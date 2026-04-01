@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: sample-atg
+  labels:
+    app.kubernetes.io/name: sample-atg
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sample-atg
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sample-atg
+        app.kubernetes.io/component: api
+    spec:
+      initContainers:
+        - name: wait-for-mongo
+          image: mongo:7.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              until mongosh "mongodb://mongo:27017/admin" --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep -qx 1; do
+                echo "waiting for mongo"
+                sleep 2
+              done
+      containers:
+        - name: api
+          image: sample-atg-app-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: HTTP_ADDR
+              value: ":8080"
+            - name: MONGODB_URI
+              value: "mongodb://mongo:27017"
+            - name: MONGODB_DATABASE
+              value: "sample_atg"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2

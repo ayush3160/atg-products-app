@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: sample-atg
+  labels:
+    app.kubernetes.io/name: sample-atg
+    app.kubernetes.io/component: mongo
+spec:
+  selector:
+    app.kubernetes.io/name: sample-atg
+    app.kubernetes.io/component: mongo
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo
