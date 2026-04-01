@@ -1,0 +1,42 @@
+services:
+  mongo:
+    image: mongo:7.0
+    command: ["mongod", "--bind_ip_all"]
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      HTTP_ADDR: ":8080"
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DATABASE: "sample_atg"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  tester:
+    image: alpine:3.21
+    profiles:
+      - test
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      BASE_URL: "http://api:8080"
+    entrypoint: ["/bin/sh", "/workspace/scripts/test-entrypoint.sh"]
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  mongo-data:
