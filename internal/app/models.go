@@ -10,12 +10,12 @@ const (
 	UserStatusActive   = "active"
 	UserStatusDisabled = "disabled"
 
-	OrderStatusDraft         = "draft"
-	OrderStatusPending       = "pending_payment"
-	OrderStatusPaid          = "paid"
-	OrderStatusCancelled     = "cancelled"
-	OrderStatusFulfilled     = "fulfilled"
-	OrderStatusRefunded      = "refunded"
+	OrderStatusDraft     = "draft"
+	OrderStatusPending   = "pending_payment"
+	OrderStatusPaid      = "paid"
+	OrderStatusCancelled = "cancelled"
+	OrderStatusFulfilled = "fulfilled"
+	OrderStatusRefunded  = "refunded"
 
 	PaymentStatusPending   = "pending"
 	PaymentStatusSucceeded = "succeeded"
@@ -35,15 +35,15 @@ type User struct {
 }
 
 type Address struct {
-	ID               primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	UserID           primitive.ObjectID `bson:"userId" json:"userId"`
-	Label            string             `bson:"label" json:"label"`
-	Line1            string             `bson:"line1" json:"line1"`
-	Line2            string             `bson:"line2" json:"line2"`
-	City             string             `bson:"city" json:"city"`
-	State            string             `bson:"state" json:"state"`
-	PostalCode       string             `bson:"postalCode" json:"postalCode"`
-	Country          string             `bson:"country" json:"country"`
+	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	UserID            primitive.ObjectID `bson:"userId" json:"userId"`
+	Label             string             `bson:"label" json:"label"`
+	Line1             string             `bson:"line1" json:"line1"`
+	Line2             string             `bson:"line2" json:"line2"`
+	City              string             `bson:"city" json:"city"`
+	State             string             `bson:"state" json:"state"`
+	PostalCode        string             `bson:"postalCode" json:"postalCode"`
+	Country           string             `bson:"country" json:"country"`
 	IsDefaultShipping bool               `bson:"isDefaultShipping" json:"isDefaultShipping"`
 	IsDefaultBilling  bool               `bson:"isDefaultBilling" json:"isDefaultBilling"`
 	CreatedAt         time.Time          `bson:"createdAt" json:"createdAt"`
@@ -77,7 +77,7 @@ type AddressSnapshot struct {
 	Line2      string             `bson:"line2" json:"line2"`
 	City       string             `bson:"city" json:"city"`
 	State      string             `bson:"state" json:"state"`
-	PostalCode  string             `bson:"postalCode" json:"postalCode"`
+	PostalCode string             `bson:"postalCode" json:"postalCode"`
 	Country    string             `bson:"country" json:"country"`
 }
 
@@ -91,24 +91,24 @@ type OrderItem struct {
 }
 
 type Order struct {
-	ID                     primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	OrderNumber            string             `bson:"orderNumber" json:"orderNumber"`
-	UserID                 primitive.ObjectID `bson:"userId" json:"userId"`
-	UserSnapshot           UserSnapshot       `bson:"userSnapshot" json:"userSnapshot"`
-	ShippingAddressID      primitive.ObjectID `bson:"shippingAddressId" json:"shippingAddressId"`
+	ID                      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	OrderNumber             string             `bson:"orderNumber" json:"orderNumber"`
+	UserID                  primitive.ObjectID `bson:"userId" json:"userId"`
+	UserSnapshot            UserSnapshot       `bson:"userSnapshot" json:"userSnapshot"`
+	ShippingAddressID       primitive.ObjectID `bson:"shippingAddressId" json:"shippingAddressId"`
 	ShippingAddressSnapshot AddressSnapshot    `bson:"shippingAddressSnapshot" json:"shippingAddressSnapshot"`
-	BillingAddressID       primitive.ObjectID `bson:"billingAddressId" json:"billingAddressId"`
-	BillingAddressSnapshot AddressSnapshot    `bson:"billingAddressSnapshot" json:"billingAddressSnapshot"`
-	Items                  []OrderItem        `bson:"items" json:"items"`
-	Currency               string             `bson:"currency" json:"currency"`
-	Subtotal               float64            `bson:"subtotal" json:"subtotal"`
-	Tax                    float64            `bson:"tax" json:"tax"`
-	ShippingFee            float64            `bson:"shippingFee" json:"shippingFee"`
-	Discount               float64            `bson:"discount" json:"discount"`
-	Total                  float64            `bson:"total" json:"total"`
-	Status                 string             `bson:"status" json:"status"`
-	CreatedAt              time.Time          `bson:"createdAt" json:"createdAt"`
-	UpdatedAt              time.Time          `bson:"updatedAt" json:"updatedAt"`
+	BillingAddressID        primitive.ObjectID `bson:"billingAddressId" json:"billingAddressId"`
+	BillingAddressSnapshot  AddressSnapshot    `bson:"billingAddressSnapshot" json:"billingAddressSnapshot"`
+	Items                   []OrderItem        `bson:"items" json:"items"`
+	Currency                string             `bson:"currency" json:"currency"`
+	Subtotal                float64            `bson:"subtotal" json:"subtotal"`
+	Tax                     float64            `bson:"tax" json:"tax"`
+	ShippingFee             float64            `bson:"shippingFee" json:"shippingFee"`
+	Discount                float64            `bson:"discount" json:"discount"`
+	Total                   float64            `bson:"total" json:"total"`
+	Status                  string             `bson:"status" json:"status"`
+	CreatedAt               time.Time          `bson:"createdAt" json:"createdAt"`
+	UpdatedAt               time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
 
 type Payment struct {
@@ -142,27 +142,27 @@ type UpdateUserRequest struct {
 }
 
 type CreateAddressRequest struct {
-	UserID           string `json:"userId"`
-	Label            string `json:"label"`
-	Line1            string `json:"line1"`
-	Line2            string `json:"line2"`
-	City             string `json:"city"`
-	State            string `json:"state"`
-	PostalCode       string `json:"postalCode"`
-	Country          string `json:"country"`
+	UserID            string `json:"userId"`
+	Label             string `json:"label"`
+	Line1             string `json:"line1"`
+	Line2             string `json:"line2"`
+	City              string `json:"city"`
+	State             string `json:"state"`
+	PostalCode        string `json:"postalCode"`
+	Country           string `json:"country"`
 	IsDefaultShipping bool   `json:"isDefaultShipping"`
 	IsDefaultBilling  bool   `json:"isDefaultBilling"`
 }
 
 type UpdateAddressRequest struct {
-	UserID           string `json:"userId"`
-	Label            string `json:"label"`
-	Line1            string `json:"line1"`
-	Line2            string `json:"line2"`
-	City             string `json:"city"`
-	State            string `json:"state"`
-	PostalCode       string `json:"postalCode"`
-	Country          string `json:"country"`
+	UserID            string `json:"userId"`
+	Label             string `json:"label"`
+	Line1             string `json:"line1"`
+	Line2             string `json:"line2"`
+	City              string `json:"city"`
+	State             string `json:"state"`
+	PostalCode        string `json:"postalCode"`
+	Country           string `json:"country"`
 	IsDefaultShipping bool   `json:"isDefaultShipping"`
 	IsDefaultBilling  bool   `json:"isDefaultBilling"`
 }
@@ -227,4 +227,33 @@ type UpdatePaymentRequest struct {
 	Provider    string `json:"provider"`
 	ProviderRef string `json:"providerRef"`
 	Status      string `json:"status"`
+}
+
+type StockAdjustmentRequest struct {
+	Delta int    `json:"delta"`
+	Note  string `json:"note"`
+}
+
+type CancelOrderRequest struct {
+	Reason string `json:"reason"`
+}
+
+type OrderCancellationResult struct {
+	Order            Order `json:"order"`
+	RefundedPayments int64 `json:"refundedPayments"`
+}
+
+type SummaryReport struct {
+	Users             int64            `json:"users"`
+	ActiveUsers       int64            `json:"activeUsers"`
+	Addresses         int64            `json:"addresses"`
+	Products          int64            `json:"products"`
+	ActiveProducts    int64            `json:"activeProducts"`
+	Orders            int64            `json:"orders"`
+	OrdersByStatus    map[string]int64 `json:"ordersByStatus"`
+	Payments          int64            `json:"payments"`
+	PaymentsByStatus  map[string]int64 `json:"paymentsByStatus"`
+	GrossRevenue      float64          `json:"grossRevenue"`
+	PendingOrderValue float64          `json:"pendingOrderValue"`
+	GeneratedAt       time.Time        `json:"generatedAt"`
 }

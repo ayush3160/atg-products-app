@@ -180,14 +180,14 @@ func snapshotUser(user User) UserSnapshot {
 
 func snapshotAddress(address Address) AddressSnapshot {
 	return AddressSnapshot{
-		ID:        address.ID,
-		Label:     address.Label,
-		Line1:     address.Line1,
-		Line2:     address.Line2,
-		City:      address.City,
-		State:     address.State,
+		ID:         address.ID,
+		Label:      address.Label,
+		Line1:      address.Line1,
+		Line2:      address.Line2,
+		City:       address.City,
+		State:      address.State,
 		PostalCode: address.PostalCode,
-		Country:   address.Country,
+		Country:    address.Country,
 	}
 }
 

@@ -107,7 +107,7 @@ func (s *Store) assemblePayment(ctx context.Context, req CreatePaymentRequest, e
 	if err != nil {
 		return Payment{}, err
 	}
-	if order.Status == OrderStatusCancelled {
+	if order.Status == OrderStatusCancelled && existing == nil {
 		return Payment{}, fmt.Errorf("%w: cannot create a payment for a cancelled order", ErrValidation)
 	}
 
