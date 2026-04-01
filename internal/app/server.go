@@ -33,12 +33,14 @@ func NewServer(store *Store) http.Handler {
 	mux.HandleFunc("GET /products", server.handleListProducts)
 	mux.HandleFunc("GET /products/{productID}", server.handleGetProduct)
 	mux.HandleFunc("PUT /products/{productID}", server.handleUpdateProduct)
+	mux.HandleFunc("POST /products/{productID}/stock-adjustments", server.handleAdjustProductStock)
 	mux.HandleFunc("DELETE /products/{productID}", server.handleDeleteProduct)
 
 	mux.HandleFunc("POST /orders", server.handleCreateOrder)
 	mux.HandleFunc("GET /orders", server.handleListOrders)
 	mux.HandleFunc("GET /orders/{orderID}", server.handleGetOrder)
 	mux.HandleFunc("PUT /orders/{orderID}", server.handleUpdateOrder)
+	mux.HandleFunc("POST /orders/{orderID}/cancel", server.handleCancelOrder)
 	mux.HandleFunc("DELETE /orders/{orderID}", server.handleDeleteOrder)
 	mux.HandleFunc("POST /orders/{orderID}/payments", server.handleCreateOrderPayment)
 	mux.HandleFunc("GET /orders/{orderID}/payments", server.handleListOrderPayments)
@@ -48,6 +50,8 @@ func NewServer(store *Store) http.Handler {
 	mux.HandleFunc("GET /payments/{paymentID}", server.handleGetPayment)
 	mux.HandleFunc("PUT /payments/{paymentID}", server.handleUpdatePayment)
 	mux.HandleFunc("DELETE /payments/{paymentID}", server.handleDeletePayment)
+
+	mux.HandleFunc("GET /reports/summary", server.handleGetSummary)
 
 	return mux
 }
@@ -61,8 +65,11 @@ func (s *apiServer) handleRoot(w http.ResponseWriter, r *http.Request) {
 			"POST /users",
 			"POST /addresses",
 			"POST /products",
+			"POST /products/{productID}/stock-adjustments",
 			"POST /orders",
+			"POST /orders/{orderID}/cancel",
 			"POST /payments",
+			"GET /reports/summary",
 		},
 	})
 }
@@ -363,6 +370,28 @@ func (s *apiServer) handleDeleteProduct(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": true, "id": id.Hex()})
 }
 
+func (s *apiServer) handleAdjustProductStock(w http.ResponseWriter, r *http.Request) {
+	id, err := parsePathObjectID(r, "productID")
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	var req StockAdjustmentRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	product, err := s.store.AdjustProductStock(r.Context(), id, req.Delta)
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, product)
+}
+
 func (s *apiServer) handleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req CreateOrderRequest
 	if err := decodeJSON(r, &req); err != nil {
@@ -463,6 +492,28 @@ func (s *apiServer) handleDeleteOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": true, "id": id.Hex()})
+}
+
+func (s *apiServer) handleCancelOrder(w http.ResponseWriter, r *http.Request) {
+	id, err := parsePathObjectID(r, "orderID")
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	var req CancelOrderRequest
+	if err := decodeJSON(r, &req); err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	result, err := s.store.CancelOrder(r.Context(), id)
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, result)
 }
 
 func (s *apiServer) handleCreateOrderPayment(w http.ResponseWriter, r *http.Request) {
@@ -594,4 +645,14 @@ func (s *apiServer) handleDeletePayment(w http.ResponseWriter, r *http.Request) 
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"deleted": true, "id": id.Hex()})
+}
+
+func (s *apiServer) handleGetSummary(w http.ResponseWriter, r *http.Request) {
+	report, err := s.store.GetSummary(r.Context())
+	if err != nil {
+		writeStoreError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, report)
 }

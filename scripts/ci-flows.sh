@@ -126,6 +126,14 @@ PRODUCT_ONE_JSON=$(request PUT "/products/$PRODUCT_ONE_ID" "$(jq -n \
 	'{sku:$sku,name:$name,description:$description,price:$price,currency:$currency,stock:$stock,active:true}')")
 printf '%s\n' "$PRODUCT_ONE_JSON"
 
+log "Adjust product stock"
+PRODUCT_ONE_JSON=$(request POST "/products/$PRODUCT_ONE_ID/stock-adjustments" "$(jq -n \
+	--argjson delta 5 \
+	--arg note "restock sample inventory" \
+	'{delta:$delta,note:$note}')")
+printf '%s\n' "$PRODUCT_ONE_JSON"
+printf '%s' "$PRODUCT_ONE_JSON" | jq -e '.stock == 25' >/dev/null
+
 log "List products"
 request GET "/products?active=true" | jq .
 
@@ -173,6 +181,11 @@ request GET "/payments/$PAYMENT_ID" | jq .
 log "List payments"
 request GET "/payments?orderId=$ORDER_ID&status=succeeded" | jq .
 
+log "Summary before order close"
+SUMMARY_JSON=$(request GET /reports/summary)
+printf '%s\n' "$SUMMARY_JSON"
+printf '%s' "$SUMMARY_JSON" | jq -e '.orders == 1 and .payments == 1 and .ordersByStatus.paid == 1 and .paymentsByStatus.succeeded == 1 and .grossRevenue == 209.73 and .pendingOrderValue == 0' >/dev/null
+
 log "Update order"
 request PUT "/orders/$ORDER_ID" "$(jq -n \
 	--arg userId "$USER_ID" \
@@ -194,12 +207,30 @@ request PUT "/orders/$ORDER_ID" "$(jq -n \
 		status:"fulfilled"
 	}')" | jq .
 
+log "Cancel order"
+CANCEL_JSON=$(request POST "/orders/$ORDER_ID/cancel" "$(jq -n \
+	--arg reason "customer requested cancellation" \
+	'{reason:$reason}')")
+printf '%s\n' "$CANCEL_JSON"
+printf '%s' "$CANCEL_JSON" | jq -e '.order.status == "cancelled" and .refundedPayments == 1' >/dev/null
+
+log "Get cancelled order"
+request GET "/orders/$ORDER_ID" | jq .
+
+log "Get refunded payment"
+request GET "/payments/$PAYMENT_ID" | jq .
+
 log "Update payment"
 request PUT "/payments/$PAYMENT_ID" "$(jq -n \
 	--arg method "card" \
 	--arg provider "sandbox-payments" \
 	--arg providerRef "tx-001-refunded" \
 	'{method:$method,provider:$provider,providerRef:$providerRef,status:"refunded"}')" | jq .
+
+log "Summary after cancellation"
+SUMMARY_JSON=$(request GET /reports/summary)
+printf '%s\n' "$SUMMARY_JSON"
+printf '%s' "$SUMMARY_JSON" | jq -e '.orders == 1 and .payments == 1 and .ordersByStatus.cancelled == 1 and .paymentsByStatus.refunded == 1 and .grossRevenue == 0' >/dev/null
 
 log "List users"
 request GET /users | jq .

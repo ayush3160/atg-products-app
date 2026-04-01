@@ -293,6 +293,24 @@ Delete:
 curl -X DELETE "$BASE_URL/products/$PRODUCT_ID"
 ```
 
+Adjust stock:
+
+```bash
+curl -X POST "$BASE_URL/products/$PRODUCT_ID/stock-adjustments" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "delta": 5,
+    "note": "restock sample inventory"
+  }'
+```
+
+Stock adjustment request fields:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `delta` | integer | Positive or negative stock change |
+| `note` | string | Optional reason for the adjustment |
+
 ### Orders
 
 Create:
@@ -355,6 +373,23 @@ Delete:
 ```bash
 curl -X DELETE "$BASE_URL/orders/$ORDER_ID"
 ```
+
+Cancel:
+
+```bash
+curl -X POST "$BASE_URL/orders/$ORDER_ID/cancel" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "customer requested cancellation"
+  }'
+```
+
+Cancel order response:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `order` | object | Updated order document with `cancelled` status |
+| `refundedPayments` | integer | Number of payments moved to `refunded` |
 
 ### Payments
 
@@ -420,9 +455,36 @@ Delete:
 curl -X DELETE "$BASE_URL/payments/$PAYMENT_ID"
 ```
 
+### Reports
+
+Summary:
+
+```bash
+curl "$BASE_URL/reports/summary"
+```
+
+Summary response:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `users` | integer | Total users |
+| `activeUsers` | integer | Users with `active` status |
+| `addresses` | integer | Total addresses |
+| `products` | integer | Total products |
+| `activeProducts` | integer | Products marked active |
+| `orders` | integer | Total orders |
+| `ordersByStatus` | object | Counts keyed by order status |
+| `payments` | integer | Total payments |
+| `paymentsByStatus` | object | Counts keyed by payment status |
+| `grossRevenue` | number | Sum of succeeded payment amounts |
+| `pendingOrderValue` | number | Sum of pending order totals |
+| `generatedAt` | string | RFC3339 timestamp |
+
 ## Notes
 
 - Orders embed snapshots of the user, shipping address, billing address, and products at the time they are created.
 - Payments derive their amount from the order total.
 - Deleting a user cascades through their addresses, orders, and payments.
 - Deleting an order cascades through its payments.
+- The stock adjustment endpoint changes product inventory directly and is useful for operational flows.
+- The cancel endpoint updates the order and refunds its non-refunded payments.

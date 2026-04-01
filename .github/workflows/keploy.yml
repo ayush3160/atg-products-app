@@ -1,0 +1,60 @@
+name: Keploy Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  keploy-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      APP_BASE_URL: http://localhost:8080
+      KEPLOY_APP_ID: e5c0e06c-aa55-4cba-b08b-0537362972d6
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Start app stack
+        run: docker compose up -d --build mongo api
+
+      - name: Wait for API
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS "$APP_BASE_URL/healthz" >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "API did not become ready in time" >&2
+          exit 1
+
+      - name: Install Keploy CLI
+        run: |
+          curl --silent -L https://keploy.io/ent/install.sh | bash
+
+      - name: Run Keploy Test Suite
+        env:
+          KEPLOY_API_KEY: ${{ secrets.KEPLOY_API_KEY }}
+        run: |
+          keploy test-suite \
+            --app="$KEPLOY_APP_ID" \
+            --base-path "$APP_BASE_URL" \
+            --cloud
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
