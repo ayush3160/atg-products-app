@@ -99,13 +99,7 @@ func (s *apiServer) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *apiServer) handleListUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := s.store.ListUsers(r.Context())
-	if err != nil {
-		writeStoreError(w, err)
-		return
-	}
-
-	writeJSON(w, http.StatusOK, users)
+	writeError(w, http.StatusNotFound, "users not found")
 }
 
 func (s *apiServer) handleGetUser(w http.ResponseWriter, r *http.Request) {
