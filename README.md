@@ -35,13 +35,13 @@ minikube image load sample-atg-app-api:latest
 Apply the Kubernetes manifests:
 
 ```bash
-kubectl apply -k k8s
+kubectl apply -f ./k8s
 ```
 
 Access the API with port-forwarding:
 
 ```bash
-kubectl -n sample-atg port-forward svc/api 8080:80
+kubectl -n default port-forward svc/api 8080:80
 ```
 
 The API then listens on `http://localhost:8080`.
